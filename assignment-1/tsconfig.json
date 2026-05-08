@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
-    "target": "ES6",
+    "rootDir": "./src",
+    "outDir": "./dist",
+
+    "target": "ES2016",
     "module": "commonjs",
+
+    "lib": ["es2016"],
 
     "strict": true,
 
@@ -9,7 +14,6 @@
     "forceConsistentCasingInFileNames": true,
 
     "skipLibCheck": true,
-
     "sourceMap": true
   },
 
