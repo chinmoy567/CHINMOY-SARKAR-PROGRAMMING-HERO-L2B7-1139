@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from "express";
-
 import jwt from "jsonwebtoken";
 import config from "../config";
+import sendResponse from "../utils/sendResponse";
 
 const auth = (...requiredRoles: string[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -10,10 +10,8 @@ const auth = (...requiredRoles: string[]) => {
 
       // no token
       if (!token) {
-        return res.status(401).json({
-          success: false,
-          message: "Unauthorized access",
-        });
+        sendResponse(res, 401, false, "Unauthorized access");
+        return;
       }
 
       // verify token
@@ -23,10 +21,9 @@ const auth = (...requiredRoles: string[]) => {
 
       // role checking
       if (requiredRoles.length && !requiredRoles.includes(decoded.role)) {
-        return res.status(403).json({
-          success: false,
-          message: "Forbidden access",
-        });
+        sendResponse(res, 403, false, "Forbidden access");
+        return;
+          
       }
 
       next();
