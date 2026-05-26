@@ -4,6 +4,7 @@ import { StatusCodes } from "http-status-codes";
 import sendResponse from "../../utils/sendResponse";
 import { loginUserFromDB, signupUserIntoDB } from "./auth.service";
 
+// signup user
 export const signupUser = async (
   req: Request,
   res: Response,
@@ -24,6 +25,8 @@ export const signupUser = async (
   }
 };
 
+
+// login user
 export const loginUser = async (
   req: Request,
   res: Response,
