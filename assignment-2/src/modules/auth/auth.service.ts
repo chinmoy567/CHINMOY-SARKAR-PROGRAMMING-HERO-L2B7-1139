@@ -5,14 +5,11 @@ import { pool } from "../../db";
 import config from "../../config";
 import type { TUser } from "./auth.interface";
 
-
 // signup user
 export const signupUserIntoDB = async (payload: TUser) => {
   const { name, email, password, role } = payload;
-
   // hash password
   const hashedPassword = await bcrypt.hash(password, 12);
-
   // insert user
   const result = await pool.query(
     `
@@ -34,15 +31,12 @@ export const signupUserIntoDB = async (payload: TUser) => {
     `,
     [name, email, hashedPassword, role],
   );
-
   return result.rows[0];
 };
 
-
 // login user
-export const loginUserFromDB = async (payload: any) => {
+export const loginUserFromDB = async (payload: TUser) => {
   const { email, password } = payload;
-
   // find user
   const result = await pool.query(
     `
@@ -51,19 +45,19 @@ export const loginUserFromDB = async (payload: any) => {
     `,
     [email],
   );
-
   const user = result.rows[0];
-
   // user not found
   if (!user) {
-    throw new Error("User not found");
+    const error: any = new Error("User not found");
+    error.statusCode = 404;
+    throw error;
   }
-
   // compare password
   const isPasswordMatched = await bcrypt.compare(password, user.password);
-
   if (!isPasswordMatched) {
-    throw new Error("Password does not match");
+    const error: any = new Error("Password or email does not match");
+    error.statusCode = 400;
+    throw error;
   }
 
   // generate token
@@ -73,17 +67,14 @@ export const loginUserFromDB = async (payload: any) => {
       name: user.name,
       role: user.role,
     },
-
     config.jwt_access_secret,
-
     {
-      expiresIn: "7d",
+      expiresIn: "365d",
     },
   );
 
   return {
     token,
-
     user: {
       id: user.id,
       name: user.name,
