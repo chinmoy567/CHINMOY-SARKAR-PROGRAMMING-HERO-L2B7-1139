@@ -49,7 +49,6 @@ export const getIssuesFromDB = async (query: any) => {
   if (type) {
     conditions.push(`type='${type}'`);
   }
-
   if (status) {
     conditions.push(`status='${status}'`);
   }
@@ -63,13 +62,10 @@ export const getIssuesFromDB = async (query: any) => {
   if (sort === "newest") {
     sql += ` ORDER BY created_at DESC`;
   }
-
   if (sort === "oldest") {
     sql += ` ORDER BY created_at ASC`;
   }
-
   const result = await pool.query(sql);
-
   return result.rows;
 };
 
@@ -83,17 +79,13 @@ export const getSingleIssueFromDB = async (id: number) => {
     `,
     [id],
   );
-
   const issue = result.rows[0];
 
   // issue not found
   if (!issue) {
     const error: any = new Error("Issue not found");
-
     error.statusCode = 404;
-
     throw error;
   }
-
   return issue;
 };
