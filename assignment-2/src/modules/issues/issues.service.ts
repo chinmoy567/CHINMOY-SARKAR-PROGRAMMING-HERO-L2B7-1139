@@ -89,3 +89,63 @@ export const getSingleIssueFromDB = async (id: number) => {
   }
   return issue;
 };
+
+// update issue
+export const updateIssueIntoDB = async (
+  id: number,
+  payload: Partial<TIssue>,
+  user: {
+    id: number;
+    role: string;
+  },
+) => {
+  //find a sepcific issue
+  const issueResult = await pool.query(
+    `
+      SELECT *
+      FROM issues
+      WHERE id=$1
+    `,
+    [id],
+  );
+  const issue = issueResult.rows[0];
+
+  // issue not found
+  if (!issue) {
+    const error: any = new Error("Issue not found");
+    error.statusCode = 404;
+    throw error;
+  }
+  // contributor permission check
+  if (user.role === "contributor") {
+    // own issue check
+    if (issue.reporter_id !== user.id) {
+      const error: any = new Error("You can update only your own issue");
+      error.statusCode = 403;
+      throw error;
+    }
+    // status check
+    if (issue.status !== "open") {
+      const error: any = new Error("Only open issues can be updated");
+      error.statusCode = 409;
+      throw error;
+    }
+  }
+  // maintainers can update any issue without any restriction
+  const { title, description, type } = payload;
+  const result = await pool.query(
+    `
+      UPDATE issues
+      SET
+        title=COALESCE($1,title),
+        description=COALESCE($2,description),
+        type=COALESCE($3,type),
+        updated_at=CURRENT_TIMESTAMP
+      WHERE id=$4
+      RETURNING *
+    `,
+    [title, description, type, id],
+  );
+
+  return result.rows[0];
+};
