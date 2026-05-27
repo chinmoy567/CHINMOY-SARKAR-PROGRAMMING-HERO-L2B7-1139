@@ -5,6 +5,7 @@ import {
   createIssueIntoDB,
   getIssuesFromDB,
   getSingleIssueFromDB,
+  updateIssueIntoDB,
 } from "./issues.service";
 
 // create issue
@@ -63,6 +64,31 @@ export const getSingleIssue = async (
       StatusCodes.OK,
       true,
       "Issue retrieved successfully",
+      result,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// update issue
+export const updateIssue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const result = await updateIssueIntoDB(
+      Number(req.params.id),
+      req.body,
+      req.user!,
+    );
+
+    sendResponse(
+      res,
+      StatusCodes.OK,
+      true,
+      "Issue updated successfully",
       result,
     );
   } catch (error) {
