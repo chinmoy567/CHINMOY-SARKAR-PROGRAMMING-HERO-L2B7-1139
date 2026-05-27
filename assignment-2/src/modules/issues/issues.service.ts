@@ -149,3 +149,33 @@ export const updateIssueIntoDB = async (
 
   return result.rows[0];
 };
+
+// delete issue
+export const deleteIssueFromDB = async (id: number) => {
+  // check issue exists
+  const issueResult = await pool.query(
+    `
+      SELECT *
+      FROM issues
+      WHERE id=$1
+    `,
+    [id],
+  );
+  const issue = issueResult.rows[0];
+
+  // issue not found
+  if (!issue) {
+    const error: any = new Error("Issue not found");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // delete issue
+  await pool.query(
+    `
+      DELETE FROM issues
+      WHERE id=$1
+    `,
+    [id],
+  );
+};
