@@ -3,6 +3,7 @@ import { StatusCodes } from "http-status-codes";
 import sendResponse from "../../utils/sendResponse";
 import {
   createIssueIntoDB,
+  deleteIssueFromDB,
   getIssuesFromDB,
   getSingleIssueFromDB,
   updateIssueIntoDB,
@@ -91,6 +92,21 @@ export const updateIssue = async (
       "Issue updated successfully",
       result,
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// delete issue
+export const deleteIssue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    await deleteIssueFromDB(Number(req.params.id));
+
+    sendResponse(res, StatusCodes.OK, true, "Issue deleted successfully");
   } catch (error) {
     next(error);
   }
