@@ -23,12 +23,12 @@ const auth = (...requiredRoles: string[]) => {
       if (requiredRoles.length && !requiredRoles.includes(decoded.role)) {
         sendResponse(res, 403, false, "Forbidden access");
         return;
-          
       }
 
       next();
-    } catch (error) {
-      next(error);
+    } catch (error: any) {
+      sendResponse(res, 401, false, "Invalid token");
+      return;
     }
   };
 };
