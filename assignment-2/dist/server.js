@@ -215,7 +215,8 @@ var auth = (...requiredRoles) => {
       }
       next();
     } catch (error) {
-      next(error);
+      sendResponse_default(res, 401, false, "Invalid token");
+      return;
     }
   };
 };
@@ -227,6 +228,24 @@ import { StatusCodes as StatusCodes2 } from "http-status-codes";
 // src/modules/issues/issues.service.ts
 var createIssueIntoDB = async (payload, reporter_id) => {
   const { title, description, type } = payload;
+  const validTypes = ["bug", "feature_request"];
+  if (!validTypes.includes(type)) {
+    const error = new Error("Invalid issue type");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!title || title.length > 150) {
+    const error = new Error(
+      "Title is required and must be under 150 characters"
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+  if (!description || description.length < 20) {
+    const error = new Error("Description must be at least 20 characters");
+    error.statusCode = 400;
+    throw error;
+  }
   const result = await pool.query(
     `
       INSERT INTO issues(
@@ -239,14 +258,14 @@ var createIssueIntoDB = async (payload, reporter_id) => {
       VALUES($1,$2,$3,$4)
 
       RETURNING
-      id,
-      title,
-      description,
-      type,
-      status,
-      reporter_id,
-      created_at,
-      updated_at
+        id,
+        title,
+        description,
+        type,
+        status,
+        reporter_id,
+        created_at,
+        updated_at
     `,
     [title, description, type, reporter_id]
   );
@@ -254,6 +273,24 @@ var createIssueIntoDB = async (payload, reporter_id) => {
 };
 var getIssuesFromDB = async (query) => {
   const { type, status, sort } = query;
+  const validSort = ["newest", "oldest"];
+  if (sort && !validSort.includes(sort)) {
+    const error = new Error("Invalid sort query");
+    error.statusCode = 400;
+    throw error;
+  }
+  const validTypes = ["bug", "feature_request"];
+  if (type && !validTypes.includes(type)) {
+    const error = new Error("Invalid issue type query");
+    error.statusCode = 400;
+    throw error;
+  }
+  const validStatus = ["open", "in_progress", "resolved"];
+  if (status && !validStatus.includes(status)) {
+    const error = new Error("Invalid status query");
+    error.statusCode = 400;
+    throw error;
+  }
   let sql = `
     SELECT *
     FROM issues
@@ -266,16 +303,39 @@ var getIssuesFromDB = async (query) => {
     conditions.push(`status='${status}'`);
   }
   if (conditions.length > 0) {
-    sql += ` WHERE ` + conditions.join(" AND ");
+    sql += `
+      WHERE
+      ${conditions.join(" AND ")}
+    `;
   }
-  if (sort === "newest") {
-    sql += ` ORDER BY created_at DESC`;
+  if (!sort || sort === "newest") {
+    sql += `
+      ORDER BY created_at DESC
+    `;
   }
   if (sort === "oldest") {
-    sql += ` ORDER BY created_at ASC`;
+    sql += `
+      ORDER BY created_at ASC
+    `;
   }
   const result = await pool.query(sql);
-  return result.rows;
+  const issues = result.rows;
+  for (const issue of issues) {
+    const reporterResult = await pool.query(
+      `
+          SELECT
+            id,
+            name,
+            role
+          FROM users
+          WHERE id=$1
+        `,
+      [issue.reporter_id]
+    );
+    issue.reporter = reporterResult.rows[0];
+    delete issue.reporter_id;
+  }
+  return issues;
 };
 var getSingleIssueFromDB = async (id) => {
   const result = await pool.query(
@@ -292,6 +352,16 @@ var getSingleIssueFromDB = async (id) => {
     error.statusCode = 404;
     throw error;
   }
+  const reporterResult = await pool.query(
+    `
+      SELECT id, name, role
+      FROM users
+      WHERE id=$1
+    `,
+    [issue.reporter_id]
+  );
+  issue.reporter = reporterResult.rows[0];
+  delete issue.reporter_id;
   return issue;
 };
 var updateIssueIntoDB = async (id, payload, user) => {
@@ -316,12 +386,36 @@ var updateIssueIntoDB = async (id, payload, user) => {
       throw error;
     }
     if (issue.status !== "open") {
-      const error = new Error("Only open issues can be updated");
+      const error = new Error(
+        "You cannot edit resolved or in-progress issues"
+      );
       error.statusCode = 409;
       throw error;
     }
   }
-  const { title, description, type } = payload;
+  const { title, description, type, status } = payload;
+  const validTypes = ["bug", "feature_request"];
+  if (type && !validTypes.includes(type)) {
+    const error = new Error("Invalid issue type");
+    error.statusCode = 400;
+    throw error;
+  }
+  const validStatus = ["open", "in_progress", "resolved"];
+  if (status && !validStatus.includes(status)) {
+    const error = new Error("Invalid status");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (title && title.length > 150) {
+    const error = new Error("Title must be under 150 characters");
+    error.statusCode = 400;
+    throw error;
+  }
+  if (description && description.length < 20) {
+    const error = new Error("Description must be at least 20 characters");
+    error.statusCode = 400;
+    throw error;
+  }
   const result = await pool.query(
     `
       UPDATE issues
@@ -329,11 +423,12 @@ var updateIssueIntoDB = async (id, payload, user) => {
         title=COALESCE($1,title),
         description=COALESCE($2,description),
         type=COALESCE($3,type),
+        status=COALESCE($4,status),
         updated_at=CURRENT_TIMESTAMP
-      WHERE id=$4
+      WHERE id=$5
       RETURNING *
     `,
-    [title, description, type, id]
+    [title, description, type, status, id]
   );
   return result.rows[0];
 };
@@ -451,10 +546,13 @@ var notFound_default = notFound;
 
 // src/middleware/globalErrorHandler.ts
 var globalErrorHandler = (err, req, res, next) => {
-  res.status(err.statusCode || 500).json({
+  const statusCode = err.statusCode || 500;
+  res.status(statusCode).json({
     success: false,
     message: err.message || "Something went wrong",
-    errors: err
+    errors: {
+      message: err.message || "Unknown error"
+    }
   });
 };
 var globalErrorHandler_default = globalErrorHandler;
@@ -470,8 +568,8 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", auth_routes_default);
 app.use("/api/issues", issues_routes_default);
-app.use(globalErrorHandler_default);
 app.use(notFound_default);
+app.use(globalErrorHandler_default);
 var app_default = app;
 
 // src/server.ts

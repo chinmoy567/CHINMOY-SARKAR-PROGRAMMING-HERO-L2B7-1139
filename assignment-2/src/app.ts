@@ -13,13 +13,15 @@ app.use(express.text());
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
-  res.send("CHINMOY SARKAR PROGRAMMING HERO L2B7-1139 ASSIGNMENT-2");
+  res.send(
+    "CHINMOY  SARKAR  PROGRAMMING  HERO L2B7-1139  ASSIGNMENT-2 (Bug & Feature Tracking System)",
+  );
 });
 
 app.use("/api/auth", authRoutes);
 app.use("/api/issues", issueRoutes);
 
-app.use(globalErrorHandler);
 app.use(notFound);
+app.use(globalErrorHandler);
 
 export default app;
