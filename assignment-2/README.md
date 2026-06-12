@@ -1,63 +1,41 @@
-# Programming Hero Assignment 2  (Bug & Feature Tracking System)
+# DevPulse API
 
-A backend API for tracking bugs and feature requests with authentication, authorization, filtering, sorting, and validation support.
+A backend issue tracking system built with Node.js, Express.js, TypeScript, and PostgreSQL. The application allows contributors to create bug reports and feature requests while maintainers manage the complete issue workflow through role-based access control.
 
----
+## Live URL
 
-## Table of Contents
+https://programming-hero-assignment-2-bug-f.vercel.app/
 
-- [Overview](#overview)
-- [Live URL](#live-url)
-- [Features](#features)
-- [Tech Stack](#tech-stack)
-- [Architecture](#architecture)
-- [File Structure](#file-structure)
-- [API Endpoints](#api-endpoints)
-- [Query Parameters](#query-parameters)
-- [Database Schema](#database-schema)
-- [Setup Steps](#setup-steps)
+## GitHub Repository
+
+https://github.com/chinmoy567/CHINMOY-SARKAR-PROGRAMMING-HERO-L2B7-1139/tree/main/assignment-2
+
+## Interview Video
+
+[Watch Interview Video](https://drive.google.com/drive/folders/16KNDrlGUwcNg0XbDWbL92YEyq0DGKpfU)
 
 ---
 
-# Overview
+## Features
 
-This project is a backend issue tracking system where users can create, manage, update, and track bugs or feature requests.
-
-The system includes:
-
-- JWT Authentication
+- User Registration
+- User Login with JWT Authentication
+- Password Hashing using bcrypt
 - Role-Based Authorization
-- Issue Filtering & Sorting
-- Input Validation
-- Global Error Handling
+- Create Issue
+- Get All Issues
+- Get Single Issue
+- Update Issue
+- Delete Issue
 - PostgreSQL Database Integration
-
-# Live URL
-
-```bash
-https://programming-hero-assignment-2-bug-f.vercel.app
-```
-
-# Features
-
-- User Registration & Login
-- JWT Authentication
-- Role-Based Authorization
-- Create Issues
-- Update Issues
-- Delete Issues
-- Issue Filtering
-- Issue Sorting
-- Query Validation
-- Global Error Handling
-- Secure Password Hashing
-- PostgreSQL Integration
-- RESTful API Design
-- CORS Configuration
+- Centralized Error Handling
+- Environment Variable Configuration
+- TypeScript Support
+- Modular Folder Structure
 
 ---
 
-# Tech Stack
+## Technology Stack
 
 ### Backend
 
@@ -67,33 +45,24 @@ https://programming-hero-assignment-2-bug-f.vercel.app
 
 ### Database
 
-- PostgreSQL
+- PostgreSQL (Neon Database)
 
 ### Authentication
 
 - JWT (jsonwebtoken)
-- bcryptjs
+- bcrypt
 
 ### Deployment
 
 - Vercel
 
-### Other Tools
-
-- tsup
-- dotenv
-- cors
-- pg
-- tsx
-- http-status-codes
-
 ---
 
-# Architecture
+## Architecture
 
 The project follows a modular backend architecture using Express.js, TypeScript, and PostgreSQL.
 
-## System Flow
+### System Flow
 
 ```text
 Client Request
@@ -113,43 +82,43 @@ Client Request
  API Response
 ```
 
-## Architecture Components
+### Architecture Components
 
-### Server Layer
+#### Server Layer
 
-- `src/server.ts`
-- `src/app.ts`
+- src/server.ts
+- src/app.ts
 
-### Route Layer
+#### Route Layer
 
-- `auth.routes.ts`
-- `issues.routes.ts`
+- auth.routes.ts
+- issues.routes.ts
 
-### Middleware Layer
+#### Middleware Layer
 
-- `auth.ts`
-- `globalErrorHandler.ts`
-- `notFound.ts`
+- auth.ts
+- globalErrorHandler.ts
+- notFound.ts
 
-### Controller Layer
+#### Controller Layer
 
-- `auth.controller.ts`
-- `issues.controller.ts`
+- auth.controller.ts
+- issues.controller.ts
 
-### Service Layer
+#### Service Layer
 
-- `auth.service.ts`
-- `issues.service.ts`
+- auth.service.ts
+- issues.service.ts
 
-### Utility Layer
+#### Utility Layer
 
-- `sendResponse.ts`
+- sendResponse.ts
 
 ---
 
-# File Structure
+## File Structure
 
-```bash
+```text
 assignment-2/
 │
 ├── src/
@@ -194,90 +163,48 @@ assignment-2/
 
 ---
 
-# API Endpoints
+## Installation
 
-## Authentication APIs
+Clone the repository
 
-### Register User
-
-```http
-POST /api/auth/signup
+```bash
+git clone https://github.com/chinmoy567/CHINMOY-SARKAR-PROGRAMMING-HERO-L2B7-1139.git
+cd assignment-2
 ```
 
-### Login User
+Install dependencies
 
-```http
-POST /api/auth/login
+```bash
+npm install
 ```
 
----
 
-## Issue APIs
+Run the development server
 
-### Create Issue
-
-```http
-POST /api/issues
+```bash
+npm run dev
 ```
 
-### Get All Issues
+Build the project
 
-```http
-GET /api/issues
+```bash
+npm run build
 ```
 
-### Get Single Issue
+Start the production server
 
-```http
-GET /api/issues/:id
-```
-
-### Update Issue
-
-```http
-PATCH /api/issues/:id
-```
-
-### Delete Issue
-
-```http
-DELETE /api/issues/:id
+```bash
+npm start
 ```
 
 ---
 
-# Query Parameters
+## Database Schema
 
-## Sorting
-
-```http
-/api/issues?sort=newest
-/api/issues?sort=oldest
-```
-
-## Filter By Type
-
-```http
-/api/issues?type=bug
-/api/issues?type=feature_request
-```
-
-## Filter By Status
-
-```http
-/api/issues?status=open
-/api/issues?status=in_progress
-/api/issues?status=resolved
-```
-
----
-
-# Database Schema
-
-## Users Table
+### Users Table
 
 | Column Name | Data Type |
-| --- | --- |
+|------------|-----------|
 | id | SERIAL |
 | name | VARCHAR |
 | email | VARCHAR |
@@ -286,10 +213,10 @@ DELETE /api/issues/:id
 | created_at | TIMESTAMP |
 | updated_at | TIMESTAMP |
 
-## Issues Table
+### Issues Table
 
 | Column Name | Data Type |
-| --- | --- |
+|------------|-----------|
 | id | SERIAL |
 | title | VARCHAR |
 | description | TEXT |
@@ -299,47 +226,134 @@ DELETE /api/issues/:id
 | created_at | TIMESTAMP |
 | updated_at | TIMESTAMP |
 
+---
+
 ## Database Relationship
 
-- One user can create multiple issues
-- `reporter_id` references the users table
+- One user can create multiple issues.
+- reporter_id references the users table.
+- Each issue belongs to a single user.
 
 ---
 
-# Setup Steps
+## API Endpoints
 
-## 1. Clone the Repository
+### Authentication APIs
 
-```bash
-git clone <your-github-repository-url>
+#### Register User
+
+```http
+POST /api/auth/signup
 ```
 
-## 2. Move Into the Project Folder
+#### Login User
 
-```bash
-cd assignment-2
+```http
+POST /api/auth/login
 ```
 
-## 3. Install Dependencies
+### Issue APIs
 
-```bash
-npm install
+#### Create Issue
+
+```http
+POST /api/issues
 ```
 
-## 4. Run the Development Server
+#### Get All Issues
 
-```bash
-npm run dev
+```http
+GET /api/issues
 ```
 
-## 5. Build the Project
+#### Get Single Issue
 
-```bash
-npm run build
+```http
+GET /api/issues/:id
 ```
 
-## 6. Start Production Server
+#### Update Issue
 
-```bash
-npm start
+```http
+PATCH /api/issues/:id
 ```
+
+#### Delete Issue
+
+```http
+DELETE /api/issues/:id
+```
+
+---
+
+## Query Parameters
+
+### Sorting
+
+```http
+/api/issues?sort=newest
+/api/issues?sort=oldest
+```
+
+### Filter By Type
+
+```http
+/api/issues?type=bug
+/api/issues?type=feature_request
+```
+
+### Filter By Status
+
+```http
+/api/issues?status=open
+/api/issues?status=in_progress
+/api/issues?status=resolved
+```
+
+---
+
+## Response Format
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "message": "Operation successful",
+  "data": {}
+}
+```
+
+### Error Response
+
+```json
+{
+  "success": false,
+  "message": "Error description",
+  "errors": {}
+}
+```
+
+---
+
+## Environment Variables
+
+```env
+PORT=5000
+DATABASE_URL=your_neon_database_url
+JWT_SECRET=your_jwt_secret
+```
+
+---
+
+## Author
+
+**Chinmoy Sarkar**
+
+GitHub: https://github.com/chinmoy567
+
+---
+
+## License
+
+This project was developed for Programming Hero Assignment 2.
