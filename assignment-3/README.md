@@ -1,6 +1,6 @@
 # Football Ticket Booking System
 
-This repository contains my Assignment 3 for the Programming Hero Next Level course.
+This repository contains my Assignment 3 for the Programming Hero Next Level Web Development Batch-7 course.
 
 The project is built using PostgreSQL. It includes database design, an Entity Relationship Diagram (ERD), sample data, and the required SQL queries.
 
