@@ -1,6 +1,6 @@
 # Football Ticket Booking System
 
-This repository contains my Assignment 3 for the Database Management System (DBMS) course.
+This repository contains my Assignment 3 for the Programming Hero Next Level course.
 
 The project is built using PostgreSQL. It includes database design, an Entity Relationship Diagram (ERD), sample data, and the required SQL queries.
 
@@ -76,28 +76,6 @@ Stores ticket booking records.
 - One User can have many Bookings.
 - One Match can have many Bookings.
 - Each Booking belongs to one User and one Match.
-
----
-
-## SQL Topics Covered
-
-- CREATE TABLE
-- PRIMARY KEY
-- FOREIGN KEY
-- INSERT INTO
-- SELECT
-- WHERE
-- LIKE
-- ILIKE
-- IS NULL
-- COALESCE
-- INNER JOIN
-- LEFT JOIN
-- Subquery
-- AVG()
-- ORDER BY
-- LIMIT
-- OFFSET
 
 ---
 
